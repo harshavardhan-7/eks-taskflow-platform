@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "eks-test-app"
-        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        PATH = "/opt/homebrew/bin/:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         AWS_REGION = "us-east-1"
         ECR_REPOSITORY = "eks-test-app"
     }
