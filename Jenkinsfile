@@ -4,6 +4,8 @@ pipeline {
     environment {
         IMAGE_NAME = "eks-test-app"
         PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        AWS_REGION = "us-east-1"
+        ECR_REPOSITORY = "eks-test-app"
     }
 
     stages {
@@ -40,6 +42,19 @@ pipeline {
                     --exit-code 1 \
                     ${IMAGE_NAME}:${BUILD_NUMBER}
                 '''
+            }
+        }
+
+        stage('AWS Authentication') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                        aws sts get-caller-identity
+                    '''
+                }
             }
         }
     }
