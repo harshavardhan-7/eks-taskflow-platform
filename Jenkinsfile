@@ -29,5 +29,11 @@ pipeline {
                 sh 'docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .'
             }
         }
+
+        stage('Security Scan') {
+            steps {
+                sh 'trivy image --severity CRITICAL --exit-code 1 ${IMAGE_NAME}:${BUILD_NUMBER}'
+            }
+        }
     }
 }
