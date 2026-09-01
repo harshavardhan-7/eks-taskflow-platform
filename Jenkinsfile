@@ -49,8 +49,7 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY'),
-                    string(credentialsId: 'aws-session-token', variable: 'AWS_SESSION_TOKEN')
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
                     sh '''
                         ACCOUNT_ID=$(aws sts get-caller-identity \
@@ -59,11 +58,29 @@ pipeline {
 
                         ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                        GIT_SHA=$(git rev-parse --short HEAD)
 
-                        docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_NUMBER}
+                        aws ecr get-login-password \
+                            --region ${AWS_REGION} \
+                        | docker login \
+                            --username AWS \
+                            --password-stdin ${ECR_REGISTRY}
 
-                        docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_NUMBER}
+                        # Jenkins build-number tag
+                        docker tag \
+                            ${IMAGE_NAME}:${BUILD_NUMBER} \
+                            ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_NUMBER}
+
+                        # Git commit tag
+                        docker tag \
+                            ${IMAGE_NAME}:${BUILD_NUMBER} \
+                            ${ECR_REGISTRY}/${ECR_REPOSITORY}:${GIT_SHA}
+
+                        docker push \
+                            ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_NUMBER}
+
+                        docker push \
+                            ${ECR_REGISTRY}/${ECR_REPOSITORY}:${GIT_SHA}
                     '''
                 }
             }
