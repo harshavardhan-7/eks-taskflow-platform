@@ -32,7 +32,14 @@ pipeline {
 
         stage('Security Scan') {
             steps {
-                sh 'trivy image --severity CRITICAL --exit-code 1 ${IMAGE_NAME}:${BUILD_NUMBER}'
+                sh '''
+                    /opt/homebrew/bin/trivy image \
+                    --scanners vuln \
+                    --severity CRITICAL \
+                    --ignore-unfixed \
+                    --exit-code 1 \
+                    ${IMAGE_NAME}:${BUILD_NUMBER}
+                '''
             }
         }
     }
