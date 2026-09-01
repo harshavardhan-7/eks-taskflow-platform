@@ -45,6 +45,14 @@ def delete(todo_id):
     db.session.commit()
     return redirect(url_for("home"))
 
-if __name__ == "__main__":
+
+@app.route("/health")
+def health():
+    return {"status": "healthy"}, 200
+
+
+with app.app_context():
     db.create_all()
-    app.run(debug=True)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
